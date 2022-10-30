@@ -14,8 +14,8 @@ Adafruit_LIS3DH lis_2 = Adafruit_LIS3DH();
 // A simple data logger for the Arduino analog pins
 
 // how many milliseconds between grabbing data and logging it. 1000 ms is once a second
-#define LOG_INTERVAL  5 // mills between entries (reduce to take more/faster data)
-#define SYNC_INTERVAL 50 // mills between calls to flush() - to write data to the card
+#define LOG_INTERVAL  25 // mills between entries (reduce to take more/faster data)
+#define SYNC_INTERVAL 250 // mills between calls to flush() - to write data to the card
 uint32_t syncTime = 0; // time of last sync()
 
 #define ECHO_TO_SERIAL   1 // echo data to serial port
