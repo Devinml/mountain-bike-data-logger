@@ -22,8 +22,21 @@ def calculate_logging_statistics(df):
     print(f'mean: {df["difference"].mean()}')
     print(f'variance: {df["difference"].var()}')
     print(f'max: {df["difference"].max()}')
-    print(f'max: {df["difference"].min()}')
+    print(f'min: {df["difference"].min()}')
+    try:
+        print(f"log_interval: {df['LOG_INTERVAL'].iloc[0]}")
+        print(f'sync interval {df["SYNC_INTERVAL"].iloc[0]}')
+        print(f'sync_time {df["syncTime"].iloc[0]}')
+    except Exception as e:
+        print("intervals not found")
 
+    print('\n')
+
+def compute_stats_of_all_files():
+    for file_ in os.listdir('data'):
+        print(f'file: {file_}')
+        df = read_file(file_)
+        calculate_logging_statistics(df)
 
 def plot_index_interval(df, file_name):
     fig, ax = plt.subplots()
@@ -32,10 +45,11 @@ def plot_index_interval(df, file_name):
     plt.savefig(f'imgs/{split_name}.jpeg')
 
 if __name__ == '__main__':
-    file_name = '10-30-56.csv'
-    plot = False
-    df = read_file(file_name)
-    calculate_logging_statistics(df)
-    make_plot(df, plot_bool=plot)
-    plot_index_interval(df, file_name)
-    calculate_time_ran(df)
+    compute_stats_of_all_files()
+    # file_name = '10-30-56.csv'
+    # plot = False
+    # df = read_file(file_name)
+    # calculate_logging_statistics(df)
+    # make_plot(df, plot_bool=plot)
+    # plot_index_interval(df, file_name)
+    # calculate_time_ran(df)
