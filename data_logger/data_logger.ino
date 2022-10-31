@@ -18,6 +18,8 @@ Adafruit_LIS3DH lis_2 = Adafruit_LIS3DH();
 #define SYNC_INTERVAL 1000 // mills between calls to flush() - to write data to the card
 uint32_t syncTime = 0; // time of last sync()
 
+
+
 #define redLEDpin 13
 #define greenLEDpin 8
 const int buttonPin = 2;  
@@ -41,32 +43,43 @@ const int chipSelect = 10;
 File logfile;
 
 void error(char *str)
-{  
+{
+  Serial.print("error: ");
+  Serial.println(str);
+  
   // red LED indicates error
   digitalWrite(redLEDpin, HIGH);
+
   while(1);
 }
 
 void setup(void)
 {
+  Serial.begin(9600);
+  Serial.println();
   pinMode(buttonPin, INPUT);
   // use debugging LEDs
   pinMode(redLEDpin, OUTPUT);
   pinMode(greenLEDpin, OUTPUT);
   digitalWrite(redLEDpin, ledState);
   if (! lis.begin(0x18)) {   // change this to 0x19 for alternative i2c address
- 
+    Serial.println("Couldnt start");
     error("Could not find First accelerometer");
   }
-  
+  lis.setDataRate(LIS3DH_DATARATE_400_HZ);
+  Serial.println("LIS3DH found!");
 
   if (! lis_2.begin(0x19)) {   // change this to 0x19 for alternative i2c address
-    
+    Serial.println("Couldnt find second acc");
     error("Could Not find Second accelerometer");
   }
+  lis_2.setDataRate(LIS3DH_DATARATE_400_HZ);
+  Serial.println("LIS3DH_2 found!");
+  
+  
 
   // initialize the SD card
-  
+  Serial.print("Initializing SD card...");
   // make sure that the default chip select pin is set to
   // output, even if you don't use it:
   pinMode(10, OUTPUT);
@@ -75,7 +88,10 @@ void setup(void)
   if (!SD.begin(chipSelect)) {
     error("Card failed, or not present");
   }
-  
+  Serial.println("card initialized.");
+  if (!rtc.begin()) {
+    logfile.println("RTC failed");
+  }
   rtc.start();
   
   analogReference(EXTERNAL);
@@ -113,36 +129,35 @@ void loop(void)
 
   // save the reading. Next time through the loop, it'll be the lastButtonState:
   lastButtonState = reading;
- 
+  Serial.println("Write_init value: ");
+  Serial.print(write_init);
   if (ledState){
     if (write_init){
-
+      Serial.println("in the init of data logging");
       DateTime now = rtc.now();
       String date;
       date =  String(now.month()) + "-" + String(now.day()) + "-"+  String(now.minute())+ ".csv";
       char filename[16] = {0};    
       date.toCharArray(filename, 16);
 
+      Serial.println("filename: " + String(filename));
+        
       if (! SD.exists(filename)) {
           // only open a new file if it doesn't exist
+        Serial.println("file does not exist creating a new one");
         logfile = SD.open(filename, FILE_WRITE); 
       }
       if (! logfile) {
         error("couldnt create file");
       }
+      
+      Serial.print("Logging to: ");
+      Serial.println(filename);
 
-      logfile.println("millis,x_1,y_1,z_1,x_2,y_2,z_2,LOG_INTERVAL,SYNC_INTERVAL,syncTime");
-      for (int i = 0; i < 8; i++) {
-        logfile.print(0);
-        logfile.print(",");
-      }
-      logfile.print(LOG_INTERVAL);
-      logfile.print(",");
-      logfile.print(SYNC_INTERVAL);
-      logfile.print(",");
-      logfile.print(syncTime);
+      logfile.println("millis,x_1,y_1,z_1,x_2,y_2,z_2");
       write_init = false; 
     }
+    Serial.println("logging data");
     lis.read();      // get X Y and Z data at once
     lis_2.read();
     sensors_event_t event;
