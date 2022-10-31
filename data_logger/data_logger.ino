@@ -66,7 +66,7 @@ void setup(void)
   // initialize the SD card
   // make sure that the default chip select pin is set to
   // output, even if you don't use it:
-  pinMode(chipSelect, OUTPUT);
+  pinMode(10, OUTPUT);
   
   // see if the card is present and can be initialized:
   if (!SD.begin(chipSelect)) {
@@ -116,8 +116,10 @@ void loop(void)
       date =  String(now.month()) + "-" + String(now.day()) + "-"+  String(now.minute())+ ".csv";
       char filename[16] = {0};    
       date.toCharArray(filename, 16);
-        
-      logfile = SD.open(filename, FILE_WRITE); 
+      if (! SD.exists(filename)) {
+          // only open a new file if it doesn't exist
+        logfile = SD.open(filename, FILE_WRITE); 
+      }
       if (! logfile) {
         error("couldnt create file");
       }
