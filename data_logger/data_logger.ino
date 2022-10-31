@@ -14,8 +14,8 @@ Adafruit_LIS3DH lis_2 = Adafruit_LIS3DH();
 // A simple data logger for the Arduino analog pins
 
 // how many milliseconds between grabbing data and logging it. 1000 ms is once a second
-const int LOG_INTERVAL = 20 ;// mills between entries (reduce to take more/faster data)
-const int SYNC_INTERVAL = 1200 ;// mills between calls to flush() - to write data to the card
+#define LOG_INTERVAL  25 // mills between entries (reduce to take more/faster data)
+#define SYNC_INTERVAL 1000 // mills between calls to flush() - to write data to the card
 uint32_t syncTime = 0; // time of last sync()
 
 #define redLEDpin 13
@@ -41,7 +41,7 @@ const int chipSelect = 10;
 File logfile;
 
 void error(char *str)
-{
+{  
   // red LED indicates error
   digitalWrite(redLEDpin, HIGH);
   while(1);
@@ -49,21 +49,24 @@ void error(char *str)
 
 void setup(void)
 {
-
   pinMode(buttonPin, INPUT);
   // use debugging LEDs
   pinMode(redLEDpin, OUTPUT);
   pinMode(greenLEDpin, OUTPUT);
   digitalWrite(redLEDpin, ledState);
   if (! lis.begin(0x18)) {   // change this to 0x19 for alternative i2c address
+ 
     error("Could not find First accelerometer");
   }
+  
 
   if (! lis_2.begin(0x19)) {   // change this to 0x19 for alternative i2c address
+    
     error("Could Not find Second accelerometer");
   }
-  
+
   // initialize the SD card
+  
   // make sure that the default chip select pin is set to
   // output, even if you don't use it:
   pinMode(10, OUTPUT);
@@ -72,6 +75,7 @@ void setup(void)
   if (!SD.begin(chipSelect)) {
     error("Card failed, or not present");
   }
+  
   rtc.start();
   
   analogReference(EXTERNAL);
@@ -98,6 +102,7 @@ void loop(void)
     // if the button state has changed:
     if (reading != buttonState) {
       buttonState = reading;
+
       // only toggle the LED if the new button state is HIGH
       if (buttonState == HIGH) {
         ledState = !ledState;
@@ -108,14 +113,16 @@ void loop(void)
 
   // save the reading. Next time through the loop, it'll be the lastButtonState:
   lastButtonState = reading;
-  Serial.print(write_init);
+ 
   if (ledState){
     if (write_init){
+
       DateTime now = rtc.now();
       String date;
       date =  String(now.month()) + "-" + String(now.day()) + "-"+  String(now.minute())+ ".csv";
       char filename[16] = {0};    
       date.toCharArray(filename, 16);
+
       if (! SD.exists(filename)) {
           // only open a new file if it doesn't exist
         logfile = SD.open(filename, FILE_WRITE); 
@@ -125,7 +132,10 @@ void loop(void)
       }
 
       logfile.println("millis,x_1,y_1,z_1,x_2,y_2,z_2,LOG_INTERVAL,SYNC_INTERVAL,syncTime");
-      logfile.print("0,0,0,0,0,0,0");
+      for (int i = 0; i < 8; i++) {
+        logfile.print(0);
+        logfile.print(",");
+      }
       logfile.print(LOG_INTERVAL);
       logfile.print(",");
       logfile.print(SYNC_INTERVAL);
