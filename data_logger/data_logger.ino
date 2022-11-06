@@ -3,6 +3,7 @@
 #include <SD.h>
 #include <Wire.h>
 #include "RTClib.h"
+#include "SPI.h"
 
 #include <Adafruit_LIS3DH.h>
 #include <Adafruit_Sensor.h>
@@ -20,7 +21,7 @@ uint32_t syncTime = 0; // time of last sync()
 
 
 
-#define redLEDpin 13
+#define redLEDpin 20
 #define greenLEDpin 8
 const int buttonPin = 2;  
 int ledState = LOW;        // the current state of the output pin
@@ -29,12 +30,12 @@ int lastButtonState = LOW;  // the previous reading from the input pin
 bool write_init = true;
 
 unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
+unsigned long debounceDelay = 200;    // the debounce time; increase if the output flickers
 
 
 // The analog pins that connect to the sensors
 
-RTC_PCF8523 rtc;// define the Real Time Clock object
+RTC_DS3231 rtc;
 
 // for the data logging shield, we use digital pin 10 for the SD cs line
 const int chipSelect = 10;
@@ -55,6 +56,8 @@ void error(char *str)
 
 void setup(void)
 {
+  // SPI.begin(); 
+  // SPI.setClockDivider(SPI_CLOCK_DIV32);
   Serial.begin(9600);
   Serial.println();
   pinMode(buttonPin, INPUT);
@@ -92,8 +95,6 @@ void setup(void)
   if (!rtc.begin()) {
     logfile.println("RTC failed");
   }
-  rtc.start();
-  
   analogReference(EXTERNAL);
 }
 
@@ -129,14 +130,12 @@ void loop(void)
 
   // save the reading. Next time through the loop, it'll be the lastButtonState:
   lastButtonState = reading;
-  Serial.println("Write_init value: ");
-  Serial.print(write_init);
   if (ledState){
     if (write_init){
       Serial.println("in the init of data logging");
       DateTime now = rtc.now();
       String date;
-      date =  String(now.month()) + "-" + String(now.day()) + "-"+  String(now.minute())+ ".csv";
+      date =  String(now.month())+ String(now.day()) + String(now.minute())+ String(now.second())+ ".csv";
       char filename[16] = {0};    
       date.toCharArray(filename, 16);
 
