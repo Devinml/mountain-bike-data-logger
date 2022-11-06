@@ -40,7 +40,7 @@ def plot_indexs_for_dir():
     for file_ in os.listdir('data'):
         df = read_file(file_)
         df = compute_differences(df)
-        
+
         # plot_index_interval(df, file_, 'difference')
 
 def compute_stats_of_all_files():
@@ -56,12 +56,13 @@ def plot_index_interval(df, file_name, column='millis'):
     plt.savefig(f'imgs/{split_name}.jpeg')
 
 if __name__ == '__main__':
-    compute_stats_of_all_files()
-    plot_indexs_for_dir()
-    # file_name = '10-30-56.csv'
-    # plot = False
-    # df = read_file(file_name)
+    # compute_stats_of_all_files()
+    # plot_indexs_for_dir()
+    file_name = '10-30-56.csv'
+    plot = True
+    df = read_file(file_name)
     # calculate_logging_statistics(df)
     # make_plot(df, plot_bool=plot)
-    # plot_index_interval(df, file_name)
+    plot_cols = ['x_1', "y_1", "z_1", "x_2", "y_2", "z_2"]
+    plot_index_interval(df, file_name, plot_cols)
     # calculate_time_ran(df)
