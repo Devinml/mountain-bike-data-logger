@@ -1,4 +1,5 @@
-
+#include <Bounce.h>
+#define BUTTON 3
 #include <SPI.h>
 #include <SD.h>
 #include <Wire.h>
@@ -23,14 +24,11 @@ uint32_t syncTime = 0; // time of last sync()
 
 #define redLEDpin 20
 #define greenLEDpin 8
-const int buttonPin = 2;  
-int ledState = LOW;        // the current state of the output pin
-int buttonState;            // the current reading from the input pin
-int lastButtonState = LOW;  // the previous reading from the input pin
-bool write_init = true;
 
-unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-unsigned long debounceDelay = 200;    // the debounce time; increase if the output flickers
+int write_data_bool = LOW;        // the current state of the output pin
+
+
+bool write_init = true;
 
 
 // The analog pins that connect to the sensors
@@ -42,7 +40,7 @@ const int chipSelect = 10;
 
 // the logging file
 File logfile;
-
+Bounce bouncer = Bounce( BUTTON, 50 ); 
 void error(char *str)
 {
   Serial.print("error: ");
@@ -58,25 +56,26 @@ void setup(void)
 {
   // SPI.begin(); 
   // SPI.setClockDivider(SPI_CLOCK_DIV32);
+  
   Serial.begin(9600);
   Serial.println();
-  pinMode(buttonPin, INPUT);
   // use debugging LEDs
+  pinMode(BUTTON,INPUT);
   pinMode(redLEDpin, OUTPUT);
   pinMode(greenLEDpin, OUTPUT);
-  digitalWrite(redLEDpin, ledState);
+  // digitalWrite(redLEDpin, ledState);
   if (! lis.begin(0x18)) {   // change this to 0x19 for alternative i2c address
     Serial.println("Couldnt start");
     error("Could not find First accelerometer");
   }
-  lis.setDataRate(LIS3DH_DATARATE_400_HZ);
+  lis.setDataRate(5000);
   Serial.println("LIS3DH found!");
 
   if (! lis_2.begin(0x19)) {   // change this to 0x19 for alternative i2c address
     Serial.println("Couldnt find second acc");
     error("Could Not find Second accelerometer");
   }
-  lis_2.setDataRate(LIS3DH_DATARATE_400_HZ);
+  lis_2.setDataRate(5000);
   Serial.println("LIS3DH_2 found!");
   
   
@@ -99,38 +98,25 @@ void setup(void)
 }
 
 void loop(void)
-{
-  int reading = digitalRead(buttonPin);
+{ 
 
-  // check to see if you just pressed the button
-  // (i.e. the input went from LOW to HIGH), and you've waited long enough
-  // since the last press to ignore any noise:
+
 
   // If the switch changed, due to noise or pressing:
-  if (reading != lastButtonState) {
-    // reset the debouncing timer
-    lastDebounceTime = millis();
+  if (bouncer.read()){
+    Serial.println("button hit");    
   }
+  if ( bouncer.update() ) {
+    Serial.println("button state updated");    
+     if ( bouncer.read() == HIGH) {
+        write_data_bool = !write_data_bool;
+        write_init = true; 
+       }
+     }
 
-  if ((millis() - lastDebounceTime) > debounceDelay) {
-    // whatever the reading is at, it's been there for longer than the debounce
-    // delay, so take it as the actual current state:
 
-    // if the button state has changed:
-    if (reading != buttonState) {
-      buttonState = reading;
 
-      // only toggle the LED if the new button state is HIGH
-      if (buttonState == HIGH) {
-        ledState = !ledState;
-        write_init = true;        
-      }
-    }
-  }
-
-  // save the reading. Next time through the loop, it'll be the lastButtonState:
-  lastButtonState = reading;
-  if (ledState){
+  if (write_data_bool){
     if (write_init){
       Serial.println("in the init of data logging");
       DateTime now = rtc.now();
