@@ -58,11 +58,11 @@ def plot_index_interval(df, file_name, column='millis'):
 if __name__ == '__main__':
     # compute_stats_of_all_files()
     # plot_indexs_for_dir()
-    file_name = '10-30-56.csv'
+    file_name = '132519.csv'
     plot = True
     df = read_file(file_name)
-    # calculate_logging_statistics(df)
-    # make_plot(df, plot_bool=plot)
+    calculate_logging_statistics(df)
+    make_plot(df, plot_bool=plot)
     plot_cols = ['x_1', "y_1", "z_1", "x_2", "y_2", "z_2"]
     plot_index_interval(df, file_name, plot_cols)
     # calculate_time_ran(df)

@@ -16,21 +16,15 @@ Adafruit_LIS3DH lis_2 = Adafruit_LIS3DH();
 // A simple data logger for the Arduino analog pins
 
 // how many milliseconds between grabbing data and logging it. 1000 ms is once a second
-#define LOG_INTERVAL  25 // mills between entries (reduce to take more/faster data)
+#define LOG_INTERVAL  10 // mills between entries (reduce to take more/faster data)
 #define SYNC_INTERVAL 1000 // mills between calls to flush() - to write data to the card
 uint32_t syncTime = 0; // time of last sync()
-
-
 
 #define redLEDpin 20
 #define greenLEDpin 8
 
 int write_data_bool = LOW;        // the current state of the output pin
-
-
 bool write_init = true;
-
-
 // The analog pins that connect to the sensors
 
 RTC_DS3231 rtc;
@@ -42,10 +36,7 @@ const int chipSelect = 10;
 File logfile;
 Bounce bouncer = Bounce( BUTTON, 50 ); 
 void error(char *str)
-{
-  Serial.print("error: ");
-  Serial.println(str);
-  
+{ 
   // red LED indicates error
   digitalWrite(redLEDpin, HIGH);
 
@@ -54,34 +45,27 @@ void error(char *str)
 
 void setup(void)
 {
-  // SPI.begin(); 
-  // SPI.setClockDivider(SPI_CLOCK_DIV32);
-  
-  Serial.begin(9600);
-  Serial.println();
+
   // use debugging LEDs
   pinMode(BUTTON,INPUT);
   pinMode(redLEDpin, OUTPUT);
   pinMode(greenLEDpin, OUTPUT);
   // digitalWrite(redLEDpin, ledState);
   if (! lis.begin(0x18)) {   // change this to 0x19 for alternative i2c address
-    Serial.println("Couldnt start");
+    
     error("Could not find First accelerometer");
   }
-  lis.setDataRate(5000);
-  Serial.println("LIS3DH found!");
+  lis.setDataRate(LIS3DH_DATARATE_LOWPOWER_5KHZ);
+  
 
   if (! lis_2.begin(0x19)) {   // change this to 0x19 for alternative i2c address
-    Serial.println("Couldnt find second acc");
+  
     error("Could Not find Second accelerometer");
   }
-  lis_2.setDataRate(5000);
-  Serial.println("LIS3DH_2 found!");
+  lis_2.setDataRate(LIS3DH_DATARATE_LOWPOWER_5KHZ);
   
-  
-
   // initialize the SD card
-  Serial.print("Initializing SD card...");
+  
   // make sure that the default chip select pin is set to
   // output, even if you don't use it:
   pinMode(10, OUTPUT);
@@ -90,7 +74,7 @@ void setup(void)
   if (!SD.begin(chipSelect)) {
     error("Card failed, or not present");
   }
-  Serial.println("card initialized.");
+  
   if (!rtc.begin()) {
     logfile.println("RTC failed");
   }
@@ -99,15 +83,7 @@ void setup(void)
 
 void loop(void)
 { 
-
-
-
-  // If the switch changed, due to noise or pressing:
-  if (bouncer.read()){
-    Serial.println("button hit");    
-  }
   if ( bouncer.update() ) {
-    Serial.println("button state updated");    
      if ( bouncer.read() == HIGH) {
         write_data_bool = !write_data_bool;
         write_init = true; 
@@ -118,31 +94,25 @@ void loop(void)
 
   if (write_data_bool){
     if (write_init){
-      Serial.println("in the init of data logging");
       DateTime now = rtc.now();
       String date;
       date =  String(now.month())+ String(now.day()) + String(now.minute())+ String(now.second())+ ".csv";
       char filename[16] = {0};    
       date.toCharArray(filename, 16);
-
-      Serial.println("filename: " + String(filename));
         
       if (! SD.exists(filename)) {
           // only open a new file if it doesn't exist
-        Serial.println("file does not exist creating a new one");
+        
         logfile = SD.open(filename, FILE_WRITE); 
       }
       if (! logfile) {
         error("couldnt create file");
       }
       
-      Serial.print("Logging to: ");
-      Serial.println(filename);
-
       logfile.println("millis,x_1,y_1,z_1,x_2,y_2,z_2");
       write_init = false; 
     }
-    Serial.println("logging data");
+
     lis.read();      // get X Y and Z data at once
     lis_2.read();
     sensors_event_t event;
