@@ -106,22 +106,22 @@ void loop() {
       }
       write_init = false; 
     }
-  sensors_event_t event;
-  sensors_event_t event_2;
+  // sensors_event_t event;
+  // sensors_event_t event_2;
   Serial.println("logging prior to loop");
   for (int i = 0; i < arr_size; i++){
     // delayMicroseconds(LOG_INTERVAL);
     lis.read();      // get X Y and Z data at once
     lis_2.read();
-    lis.getEvent(&event);
-    lis_2.getEvent(&event_2);
+    // lis.getEvent(&event);
+    // lis_2.getEvent(&event_2);
     logs[i].time = millis();
-    logs[i].x1 = event.acceleration.x;
-    logs[i].y1 = event.acceleration.y;
-    logs[i].z1 = event.acceleration.z;
-    logs[i].x2 = event_2.acceleration.x;
-    logs[i].y2 = event_2.acceleration.y;
-    logs[i].z2 = event_2.acceleration.z;
+    logs[i].x1 = lis.x;
+    logs[i].y1 = lis.y;
+    logs[i].z1 = lis.z;
+    logs[i].x2 = lis_2.x;
+    logs[i].y2 = lis_2.y;
+    logs[i].z2 = lis_2.z;
   }
   // dump file baybe
   digitalWrite(greenLEDpin, HIGH);
