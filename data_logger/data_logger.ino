@@ -16,7 +16,7 @@ Adafruit_LIS3DH lis_2 = Adafruit_LIS3DH();
 // A simple data logger for the Arduino analog pins
 
 // how many milliseconds between grabbing data and logging it. 1000 ms is once a second
-#define LOG_INTERVAL  10 // mills between entries (reduce to take more/faster data)
+#define LOG_INTERVAL  100 // micros between entries (reduce to take more/faster data)
 #define SYNC_INTERVAL 1000 // mills between calls to flush() - to write data to the card
 uint32_t syncTime = 0; // time of last sync()
 
@@ -85,13 +85,13 @@ void loop(void)
 { 
   if ( bouncer.update() ) {
      if ( bouncer.read() == HIGH) {
+       if (write_data_bool){
+         logfile.close();
+       }
         write_data_bool = !write_data_bool;
         write_init = true; 
        }
      }
-
-
-
   if (write_data_bool){
     if (write_init){
       DateTime now = rtc.now();
@@ -121,26 +121,29 @@ void loop(void)
     lis_2.getEvent(&event_2);
 
     // delay for the amount of time we want between readings
-    delay((LOG_INTERVAL - 1) - (millis() % LOG_INTERVAL));
+    delayMicroseconds(LOG_INTERVAL);
     
     digitalWrite(greenLEDpin, HIGH);
     
     // log milliseconds since starting
     uint32_t m = millis();
-    logfile.print(m);           // milliseconds since start
-    logfile.print(",");
-    logfile.print(event.acceleration.x);
-    logfile.print(",");
-    logfile.print(event.acceleration.y);
-    logfile.print(",");
-    logfile.print(event.acceleration.z);
-    logfile.print(",");
-    logfile.print(event_2.acceleration.x);
-    logfile.print(",");
-    logfile.print(event_2.acceleration.y);
-    logfile.print(",");
-    logfile.print(event_2.acceleration.z);
-    logfile.println();
+    String data_string;
+    data_string = m + String(",") + String(event.acceleration.x) + String(",") +  String(event.acceleration.y) + String(",") +  String(event.acceleration.z) + String(",") +  String(event_2.acceleration.x) + String(",") +  String(event_2.acceleration.y) + String(",") +  String(event_2.acceleration.z);
+    logfile.println(data_string);
+    // logfile.print(m);           // milliseconds since start
+    // logfile.print(",");
+    // logfile.print(event.acceleration.x);
+    // logfile.print(",");
+    // logfile.print(event.acceleration.y);
+    // logfile.print(",");
+    // logfile.print(event.acceleration.z);
+    // logfile.print(",");
+    // logfile.print(event_2.acceleration.x);
+    // logfile.print(",");
+    // logfile.print(event_2.acceleration.y);
+    // logfile.print(",");
+    // logfile.print(event_2.acceleration.z);
+    // logfile.println();
 
     digitalWrite(greenLEDpin, LOW);
 
@@ -151,7 +154,7 @@ void loop(void)
     
     // blink LED to show we are syncing data to the card & updating FAT!
     digitalWrite(redLEDpin, HIGH);
-    logfile.flush();
+    // logfile.flush();
     digitalWrite(redLEDpin, LOW);
   }
 }

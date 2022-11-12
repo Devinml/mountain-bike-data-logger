@@ -10,7 +10,7 @@ def make_plot(df, plot_bool):
     df.plot(x='millis', ax=ax)
     if plot:
         plt.show()
-    
+
 def calculate_time_ran(df):
     first = df['millis'].iloc[0]
     last = df['millis'].iloc[-1]
@@ -58,7 +58,7 @@ def plot_index_interval(df, file_name, column='millis'):
 if __name__ == '__main__':
     # compute_stats_of_all_files()
     # plot_indexs_for_dir()
-    file_name = '132519.csv'
+    file_name = '154017.csv'
     plot = True
     df = read_file(file_name)
     calculate_logging_statistics(df)
