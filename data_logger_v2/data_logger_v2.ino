@@ -30,18 +30,18 @@ const int arr_size = 100;
 typedef struct
   {
       uint32_t time;
-      float x1;
-      float y1;
-      float z1;
-      float x2;
-      float y2;
-      float z2;
+      uint32_t x1;
+      uint32_t y1;
+      uint32_t z1;
+      uint32_t x2;
+      uint32_t y2;
+      uint32_t z2;
   }  datapoint;
 
 datapoint logs[arr_size];
 
 void setup() {
-  Wire.setClock(800000);  
+  
   Serial.begin(9600);
   pinMode(BUTTON,INPUT);
   pinMode(redLEDpin, OUTPUT);
@@ -52,8 +52,8 @@ void setup() {
     Serial.println("no acc");
     error();
   }
-  lis.setDataRate(LIS3DH_DATARATE_LOWPOWER_5KHZ);
-  lis_2.setDataRate(LIS3DH_DATARATE_LOWPOWER_5KHZ);
+  lis.setDataRate(LIS3DH_DATARATE_LOWPOWER_1K6HZ);
+  lis_2.setDataRate(LIS3DH_DATARATE_LOWPOWER_1K6HZ);
   Serial.println("Data rates set");
   
   pinMode(chipSelect, OUTPUT);
@@ -67,9 +67,7 @@ void setup() {
     logfile.println("RTC failed");
   }
   Serial.println("ready to log");
-
-
-
+  Wire.setClock(1000000);  
 }
 
 void loop() {
