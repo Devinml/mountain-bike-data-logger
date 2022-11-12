@@ -41,6 +41,7 @@ typedef struct
 datapoint logs[arr_size];
 
 void setup() {
+  Wire.setClock(800000);  
   Serial.begin(9600);
   pinMode(BUTTON,INPUT);
   pinMode(redLEDpin, OUTPUT);
@@ -66,6 +67,8 @@ void setup() {
     logfile.println("RTC failed");
   }
   Serial.println("ready to log");
+
+
 
 }
 
@@ -103,14 +106,14 @@ void loop() {
       }
       write_init = false; 
     }
+  sensors_event_t event;
+  sensors_event_t event_2;
   Serial.println("logging prior to loop");
   for (int i = 0; i < arr_size; i++){
-    delayMicroseconds(LOG_INTERVAL);
+    // delayMicroseconds(LOG_INTERVAL);
     lis.read();      // get X Y and Z data at once
     lis_2.read();
-    sensors_event_t event;
     lis.getEvent(&event);
-    sensors_event_t event_2;
     lis_2.getEvent(&event_2);
     logs[i].time = millis();
     logs[i].x1 = event.acceleration.x;
@@ -121,7 +124,9 @@ void loop() {
     logs[i].z2 = event_2.acceleration.z;
   }
   // dump file baybe
+  digitalWrite(greenLEDpin, HIGH);
   logfile.write(logs, sizeof(logs));
+  digitalWrite(greenLEDpin, LOW);
   }
 
 }
