@@ -56,8 +56,8 @@ def plot_index_interval(df, file_name, column='millis'):
     plt.savefig(f'imgs/{split_name}.jpeg')
 
 if __name__ == '__main__':
-    # compute_stats_of_all_files()
-    # plot_indexs_for_dir()
+    compute_stats_of_all_files()
+    plot_indexs_for_dir()
     file_name = '154017.csv'
     plot = True
     df = read_file(file_name)
