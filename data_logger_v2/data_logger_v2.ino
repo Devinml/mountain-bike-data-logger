@@ -41,7 +41,6 @@ typedef struct
 datapoint logs[arr_size];
 
 void setup() {
-  Serial.begin(9600);
   pinMode(BUTTON,INPUT);
   pinMode(redLEDpin, OUTPUT);
   pinMode(greenLEDpin, OUTPUT);
@@ -61,7 +60,6 @@ void setup() {
   if (!rtc.begin()) {
     logfile.println("RTC failed");
   }
-  Serial.println("setup complete");
 
 }
 
@@ -82,7 +80,6 @@ void loop() {
       blink();
       blink();
       blink();
-      Serial.println("writing init");
       DateTime now = rtc.now();
       String date;
       date =  String(now.month())+ String(now.day()) + String(now.minute())+ String(now.second())+ ".txt";
@@ -104,7 +101,6 @@ void loop() {
     lis_2.read();
     sensors_event_t event;
     lis.getEvent(&event);
-    Serial.println(event.acceleration.x);
     sensors_event_t event_2;
     lis_2.getEvent(&event_2);
     logs[i].time = millis();
@@ -116,24 +112,18 @@ void loop() {
     logs[i].z2 = event_2.acceleration.z;
   }
   // dump file baybe
-  Serial.println("WRITING data");
   int timenow = millis();
   logfile.write(logs, sizeof(logs));
-  Serial.print("writing took.  ");
-  Serial.print(millis() - timenow);
-  Serial.println();
-  Serial.print("Size of arr: ");
-  Serial.print(sizeof(logs));
-  Serial.println();
   }
 
 }
 void blink(){
+  delay(200);
   digitalWrite(greenLEDpin, HIGH);
   delay(200);
   digitalWrite(greenLEDpin, LOW);
 }
-void error(char *str)
+void error()
 { 
   // red LED indicates error
   for (int i= 0; i< 5; i++){
@@ -143,8 +133,6 @@ void error(char *str)
     digitalWrite(greenLEDpin, LOW);
 
   }
-  Serial.print("error: ");
-  Serial.println(str);
 
   while(1);
 }
