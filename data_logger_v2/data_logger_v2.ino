@@ -24,7 +24,7 @@ Bounce bouncer = Bounce( BUTTON, 50 );
 int write_data_bool = LOW;
 bool write_init = true;
 const int chipSelect = 10;
-const int arr_size = 200;
+const int arr_size = 100;
 
 
 typedef struct
@@ -41,25 +41,31 @@ typedef struct
 datapoint logs[arr_size];
 
 void setup() {
+  Serial.begin(9600);
   pinMode(BUTTON,INPUT);
   pinMode(redLEDpin, OUTPUT);
   pinMode(greenLEDpin, OUTPUT);
+  Serial.begin("pinmode out ");
+
   if (! lis.begin(0x18) || (! lis_2.begin(0x19))) { 
-    error("sensor is not htere.");
+    Serial.println("no acc");
+    error();
   }
   lis.setDataRate(LIS3DH_DATARATE_LOWPOWER_5KHZ);
   lis_2.setDataRate(LIS3DH_DATARATE_LOWPOWER_5KHZ);
+  Serial.println("Data rates set");
   
   pinMode(chipSelect, OUTPUT);
   
   // see if the card is present and can be initialized:
   if (!SD.begin(chipSelect)) {
-    error("Card failed, or not present");
+    error();
   }
   
   if (!rtc.begin()) {
     logfile.println("RTC failed");
   }
+  Serial.println("ready to log");
 
 }
 
@@ -76,7 +82,9 @@ void loop() {
   }
   if (write_data_bool){
     blink();
+    Serial.println("write data log hit");
     if (write_init){
+      Serial.println("Preparing to logg");
       blink();
       blink();
       blink();
@@ -87,14 +95,15 @@ void loop() {
       date.toCharArray(filename, 16);
       if (! SD.exists(filename)) {
           // only open a new file if it doesn't exist
-        
         logfile = SD.open(filename, FILE_WRITE); 
       }
       if (! logfile) {
-        error("couldnt create file");
+        Serial.println("error with SD card");
+        error();
       }
       write_init = false; 
     }
+  Serial.println("logging prior to loop");
   for (int i = 0; i < arr_size; i++){
     delayMicroseconds(LOG_INTERVAL);
     lis.read();      // get X Y and Z data at once
@@ -112,7 +121,6 @@ void loop() {
     logs[i].z2 = event_2.acceleration.z;
   }
   // dump file baybe
-  int timenow = millis();
   logfile.write(logs, sizeof(logs));
   }
 
