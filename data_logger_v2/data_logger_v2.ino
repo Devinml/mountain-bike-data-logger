@@ -104,15 +104,10 @@ void loop() {
       }
       write_init = false; 
     }
-  // sensors_event_t event;
-  // sensors_event_t event_2;
   Serial.println("logging prior to loop");
   for (int i = 0; i < arr_size; i++){
-    // delayMicroseconds(LOG_INTERVAL);
     lis.read();      // get X Y and Z data at once
     lis_2.read();
-    // lis.getEvent(&event);
-    // lis_2.getEvent(&event_2);
     logs[i].time = millis();
     logs[i].x1 = lis.x;
     logs[i].y1 = lis.y;

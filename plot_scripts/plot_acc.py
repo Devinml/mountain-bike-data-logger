@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 def read_file(file_name):
     return pd.read_csv(f'{file_name}')
 
-def make_plot(df, plot_bool):
+def make_plot(df, plot_bool=False):
     fig, ax = plt.subplots()
     df.plot(x='time', ax=ax)
     if plot_bool:
@@ -36,18 +36,27 @@ def calculate_logging_statistics(df):
         print("intervals not found")
     print('\n')
 
+def plot_acc(df, file_name, col='x1', save=False):
+    fig, ax = plt.subplots()
+    df.plot(x='time', y=col, ax=ax)
+    plt.title(f"ACC {col} file_name: {file_name}")
+    plt.tight_layout()
+
 def plot_indexs_for_dir():
     for file_ in os.listdir('data/parsed_bin_files/'):
         full_file_path = 'data/parsed_bin_files/' + file_
         df = read_file(full_file_path)
-        # df = compute_differences(df)
+        df = compute_differences    (df)
+        plot_index_interval(df, file_, 'difference')
+        for col in ["x1", "y1", "z1", "x2", "y2", "z2"]:
+            plot_acc(df, file_name=file_, col=col)
 
-        # plot_index_interval(df, file_, 'difference')
 
 def compute_stats_of_all_files():
     for file_ in os.listdir('data/parsed_bin_files/'):
         print(f'file: {file_}')
-        df = read_file(file_)
+        full_file_path = 'data/parsed_bin_files/' + file_
+        df = read_file(full_file_path)
         calculate_logging_statistics(df)
 
 def plot_index_interval(df, file_name, column='time'):
@@ -59,6 +68,7 @@ def plot_index_interval(df, file_name, column='time'):
 if __name__ == '__main__':
     compute_stats_of_all_files()
     plot_indexs_for_dir()
+    plt.show()
     # file_name = '154017.csv'
     # plot = True
     # df = read_file(file_name)
