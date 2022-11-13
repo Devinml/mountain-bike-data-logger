@@ -19,12 +19,11 @@ Bounce bouncer = Bounce( BUTTON, 50 );
 #define redLEDpin 20
 #define greenLEDpin 8
 #define LOG_INTERVAL 1 // delay in microseconds
-#define SYNC_INTERVAL 1000 // delay in milis
 
 int write_data_bool = LOW;
 bool write_init = true;
 const int chipSelect = 10;
-const int arr_size = 100;
+const int arr_size = 1500;
 
 
 typedef struct
