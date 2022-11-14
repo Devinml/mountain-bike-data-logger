@@ -26,7 +26,6 @@ bool write_init = true;
 const int chipSelect = 10;
 const int arr_size = 1500;
 
-
 typedef struct
   {
       uint32_t time;
@@ -85,9 +84,6 @@ void loop() {
     Serial.println("write data log hit");
     if (write_init){
       Serial.println("Preparing to logg");
-      blink();
-      blink();
-      blink();
       DateTime now = rtc.now();
       String date;
       date =  String(now.month())+ String(now.day()) + String(now.minute())+ String(now.second())+ ".txt";
