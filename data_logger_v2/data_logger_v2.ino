@@ -1,6 +1,6 @@
 #include <Bounce.h>
 #define BUTTON 3
-#include <SD.h>
+#include "SdFat.h"
 #include <Wire.h>
 #include "RTClib.h"
 #include "SPI.h"
@@ -11,7 +11,8 @@
 
 Adafruit_LIS3DH lis = Adafruit_LIS3DH();
 Adafruit_LIS3DH lis_2 = Adafruit_LIS3DH();
-File logfile;
+SdFat sd;
+SdFile logfile;
 RTC_DS3231 rtc;
 Bounce bouncer = Bounce( BUTTON, 50 ); 
 
@@ -58,7 +59,7 @@ void setup() {
   pinMode(chipSelect, OUTPUT);
   
   // see if the card is present and can be initialized:
-  if (!SD.begin(chipSelect)) {
+  if (!sd.begin(chipSelect)) {
     error();
   }
   
@@ -81,7 +82,6 @@ void loop() {
        }
   }
   if (write_data_bool){
-    blink();
     Serial.println("write data log hit");
     if (write_init){
       Serial.println("Preparing to logg");
@@ -93,9 +93,9 @@ void loop() {
       date =  String(now.month())+ String(now.day()) + String(now.minute())+ String(now.second())+ ".txt";
       char filename[16] = {0};    
       date.toCharArray(filename, 16);
-      if (! SD.exists(filename)) {
+      if (! sd.exists(filename)) {
           // only open a new file if it doesn't exist
-        logfile = SD.open(filename, FILE_WRITE); 
+          logfile.open(filename, O_WRONLY | O_CREAT | O_EXCL);
       }
       if (! logfile) {
         Serial.println("error with SD card");
