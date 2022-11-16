@@ -1,6 +1,9 @@
 import os
 import pandas as pd
+from matplotlib.figure import figaspect
 import matplotlib.pyplot as plt
+
+# plt.style.use("ggplot")
 
 def read_file(file_name):
     return pd.read_csv(f'{file_name}')
@@ -65,9 +68,25 @@ def plot_index_interval(df, file_name, column='time'):
     split_name = file_name.split('.')[0]
     plt.savefig(f'imgs/{split_name}.jpeg')
 
+def plot_z1_vs_z2(df):
+    
+    w, h = figaspect(16/9)
+    fig, ax = plt.subplots(figsize=(w,h))
+    ax.set_ylabel("(m/s^2)")
+    ax.set_xlabel("time (millis)")
+    ax.plot(df['time'], df['z1'], label='lower')
+    ax.set_xlim(33749, 34255)
+    ax.plot(df['time'], df['z2'], label='upper')
+    plt.tight_layout()
+
+    ax.legend()
+
 if __name__ == '__main__':
-    compute_stats_of_all_files()
-    plot_indexs_for_dir()
+    # compute_stats_of_all_files()
+    # plot_indexs_for_dir()
+    df = read_file('data/parsed_bin_files/110554_hard.csv')
+    plot_z1_vs_z2(df)
+    
     plt.show()
     # file_name = '154017.csv'
     # plot = True
